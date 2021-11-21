@@ -14,6 +14,9 @@ function App() {
   const theme = createTheme({
     palette: {
       mode: pallteType,
+      background: {
+        default: pallteType === "light" ? "#eaeaea" : "#121212",
+      },
     },
   });
 
