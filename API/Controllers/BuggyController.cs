@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     
-    public class BuggyController : BaseApiContrroller
+    public class BuggyController : BaseApiController
     {
         [HttpGet("not-found")]
         public ActionResult GetNotFound()
@@ -20,7 +20,7 @@ namespace API.Controllers
         {
             return BadRequest(new ProblemDetails{Title = "This is a bad reuquest!"});
         }
-        [HttpGet("unauthorized")]
+        [HttpGet("unauthorized0")]
         public ActionResult GetUnauthorized()
         {
             return Unauthorized();
