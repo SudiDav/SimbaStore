@@ -20,7 +20,7 @@ namespace API.Controllers
         {
             return BadRequest(new ProblemDetails{Title = "This is a bad reuquest!"});
         }
-        [HttpGet("unauthorized0")]
+        [HttpGet("unauthorized")]
         public ActionResult GetUnauthorized()
         {
             return Unauthorized();
