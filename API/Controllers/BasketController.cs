@@ -34,10 +34,10 @@ namespace API.Controllers
             // get the basket
             var basket = await RetrieveBasket();
 
-            if(basket is null) basket = createBasket();
+            if(basket == null) basket = createBasket();
 
             var product = await _context.Products.FindAsync(productId);
-            if(product is null) return NotFound();
+            if(product == null) return NotFound();
 
             basket.AddItem(product, quantity);
 
@@ -73,8 +73,12 @@ namespace API.Controllers
         private Basket createBasket()
         {
             var buyerId = Guid.NewGuid().ToString();
-            var cookieOptions = new CookieOptions { IsEssential = true, Expires = DateTime.Now.AddDays(30) };
-            Response.Cookies.Append("buyerId", buyerId, cookieOptions);
+            var cookieOptions = new CookieOptions 
+            { 
+                IsEssential = true, 
+                Expires = DateTime.Now.AddDays(30) 
+            };
+            Response.Cookies.Append("buyerId",buyerId, cookieOptions);
             var basket = new Basket()
             {
                 BuyerId = buyerId
