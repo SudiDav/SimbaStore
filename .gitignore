@@ -455,3 +455,4 @@ $RECYCLE.BIN/
 API/appsettings.json
 API/store.db-shm
 .gitignore
+API/store.db-wal

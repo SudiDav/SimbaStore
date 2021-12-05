@@ -73,12 +73,8 @@ namespace API.Controllers
         private Basket createBasket()
         {
             var buyerId = Guid.NewGuid().ToString();
-            var cookieOptions = new CookieOptions 
-            { 
-                IsEssential = true, 
-                Expires = DateTime.Now.AddDays(30) 
-            };
-            Response.Cookies.Append("buyerId",buyerId, cookieOptions);
+            var cookieOptions = new CookieOptions { IsEssential = true, Expires = DateTime.Now.AddDays(30) };
+            Response.Cookies.Append("buyerId", buyerId, cookieOptions);
             var basket = new Basket()
             {
                 BuyerId = buyerId
@@ -95,13 +91,13 @@ namespace API.Controllers
                 BuyerId = basket.BuyerId,
                 Items = basket.Items.Select(item => new BasketItemDto
                 {
-                    ProductId = item.Id,
-                    Quantity = item.Quantity,
+                    ProductId = item.ProductId,
                     Name = item.Product.Name,
-                    PictureUrl = item.Product.PictureUrl,
                     Price = item.Product.Price,
+                    PictureUrl = item.Product.PictureUrl,
                     Type = item.Product.Type,
                     Brand = item.Product.Brand,
+                    Quantity = item.Quantity
                 }).ToList()
             };
         }
