@@ -4,3 +4,7 @@ export function getCookie(key: string) {
   );
   return cookieId ? cookieId.pop() : "";
 }
+
+export function currencyFormat(amount: number) {
+  return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+}
