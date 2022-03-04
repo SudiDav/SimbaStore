@@ -32,5 +32,23 @@ namespace API.Extensions
 
             return query.Where(p => p.Name.ToLower().Contains(lowerCaseSearchTerm));
         }
+
+        public static IQueryable<Product> Filter(this IQueryable<Product> query, string brands, string types)
+        {
+            // var brandsList = !string.IsNullOrWhiteSpace(brands) ? new List<string>() : brands.Split(',').ToList();
+            var brandsList = new List<string>();
+            var typesList = new List<string>();
+
+            if(!string.IsNullOrWhiteSpace(brands))
+                brandsList.AddRange(brands.ToLower().Split(",").ToList());
+
+            if(!string.IsNullOrWhiteSpace(types))
+                typesList.AddRange(types.ToLower().Split(",").ToList());
+
+            query = query.Where(p => brandsList.Count == 0 || brandsList.Contains(p.Brand.ToLower()));
+            query = query.Where(p => typesList.Count == 0 || typesList.Contains(p.Type.ToLower()));
+
+            return query;
+        }
     }
 }
