@@ -13,7 +13,7 @@ interface CatalogState {
   status: string;
   brands: string[];
   types: string[];
-  productsParams: ProductParams;
+  productParams: ProductParams;
 }
 
 const productsAdapter = createEntityAdapter<Product>();
@@ -40,7 +40,7 @@ export const fetchProductsAsync = createAsyncThunk<
   void,
   {state: RootState}
 >("catalog/fetchProductsAsync", async (_, thunkAPI) => {
-  const params = getAxiosParams(thunkAPI.getState().catalog.productsParams);
+  const params = getAxiosParams(thunkAPI.getState().catalog.productParams);
   try {
     return await agent.Catalog.list(params);
   } catch (error: any) {
@@ -80,22 +80,22 @@ const initParams = () => {
 
 export const catalogSlice = createSlice({
   name: "catalog",
-  initialState: productsAdapter.getInitialState({
+  initialState: productsAdapter.getInitialState<CatalogState>({
     productsLoaded: false,
     filtersLoaded: false,
     status: "idle",
     brands: [],
     types: [],
-    productsParams: initParams(),
+    productParams: initParams(),
   }),
   reducers: {
-    setProductsParams: (state, action) => {
+    setProductParams: (state, action) => {
       state.productsLoaded = false;
-      state.productsParams = {...state.productsParams, ...action.payload};
+      state.productParams = {...state.productParams, ...action.payload};
     },
-    resetProductsParams: state => {
+    resetProductParams: state => {
       state.productsLoaded = false;
-      state.productsParams = initParams();
+      state.productParams = initParams();
     },
   },
   extraReducers: builder => {
@@ -127,6 +127,7 @@ export const catalogSlice = createSlice({
       state.brands = action.payload.brands;
       state.types = action.payload.types;
       state.filtersLoaded = true;
+      state.status = "idle";
     });
     builder.addCase(fetchFilters.rejected, (state, action) => {
       state.status = "idle";
@@ -139,4 +140,4 @@ export const productSelectors = productsAdapter.getSelectors(
   (state: RootState) => state.catalog
 );
 
-export const {setProductsParams, resetProductsParams} = catalogSlice.actions;
+export const {setProductParams, resetProductParams} = catalogSlice.actions;
