@@ -82,6 +82,12 @@ const TestErrors = {
   getValidationError: () => requests.get("buggy/validation-error"),
 };
 
+const Account = {
+  login: (values: any) => requests.post("account/login", values),
+  register: (values: any) => requests.post("account/register", values),
+  currentUser: () => requests.get("account/currentUser"),
+};
+
 const Basket = {
   get: () => requests.get("basket"),
   addItem: (productId: number, quantity = 1) =>
@@ -93,6 +99,7 @@ const agent = {
   Catalog,
   TestErrors,
   Basket,
+  Account,
 };
 
 export default agent;
