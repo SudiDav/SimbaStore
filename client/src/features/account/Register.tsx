@@ -47,7 +47,7 @@ export default function Register() {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component='h1' variant='h5'>
-          Sign in
+          Sign Up
         </Typography>
         <Box component='form' onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
           <TextField
@@ -90,11 +90,11 @@ export default function Register() {
             variant='contained'
             sx={{mt: 3, mb: 2}}
           >
-            Sign In
+            Sign Up
           </Button>
           <Grid container>
             <Grid item>
-              <Link to='/login'>{"Don't have an account? Sign Up"}</Link>
+              <Link to='/login'>{"Have an account? Login here"}</Link>
             </Grid>
           </Grid>
         </Box>
