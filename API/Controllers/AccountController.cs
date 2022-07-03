@@ -31,6 +31,7 @@ namespace API.Controllers
 
             return new UserDto
             {
+                Name = user.UserName,
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user)
             };
@@ -65,9 +66,10 @@ namespace API.Controllers
 
             return new UserDto
             {
+                Name = user.UserName,
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user)
-        };
+            };
         }
     }
 }
