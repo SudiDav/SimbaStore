@@ -1,26 +1,41 @@
-import * as React from "react";
 import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import {Paper} from "@mui/material";
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
+import {useForm} from "react-hook-form";
+import {LoadingButton} from "@mui/lab";
+import agent from "../../app/api/agent";
+import {toast} from "react-toastify";
 
 export default function Register() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+  const history = useHistory();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: {isSubmitting, errors, isValid},
+  } = useForm({
+    mode: "all",
+  });
+
+  const handldeApiErros = (errors: any) => {
+    if (errors) {
+      errors.forEach((error: string) => {
+        if (error.includes("Password")) {
+          setError("password", {message: error});
+        } else if (error.includes("Email")) {
+          setError("email", {message: error});
+        } else if (error.includes("Username")) {
+          setError("username", {message: error});
+        }
+      });
+    }
   };
 
   return (
@@ -43,58 +58,79 @@ export default function Register() {
           alignItems: "center",
         }}
       >
-        <Avatar sx={{m: 1, bgcolor: "secondary.main"}}>
+        <Avatar sx={{m: 1, bgcolor: "primary.main"}}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component='h1' variant='h5'>
-          Sign Up
+          Register To SimbaStore
         </Typography>
-        <Box component='form' onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
+        <Box
+          component='form'
+          onSubmit={handleSubmit(data =>
+            agent.Account.register(data)
+              .then(() => {
+                toast.success("Registration successful-you can now login");
+                history.push("/login");
+              })
+              .catch(error => handldeApiErros(error))
+          )}
+          noValidate
+          sx={{mt: 1}}
+        >
           <TextField
             margin='normal'
-            required
             fullWidth
-            id='email'
             label='username'
-            name='email'
-            autoComplete='email'
             autoFocus
+            {...register("username", {required: "Username is required"})}
+            error={!!errors.username}
+            helperText={errors?.username?.message}
+          />
+
+          <TextField
+            margin='normal'
+            fullWidth
+            label='Email address'
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^\w+[\w-.]*@\w+((-\w+)|(\w*))\.[a-z]{2,3}$/,
+                message: "Not a valid email",
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors?.email?.message}
           />
           <TextField
             margin='normal'
-            required
             fullWidth
-            name='password'
-            label='Email Address'
-            type='email'
-            id='password'
-            autoComplete='current-password'
-          />
-          <TextField
-            margin='normal'
-            required
-            fullWidth
-            name='password'
             label='Password'
             type='password'
-            id='password'
-            autoComplete='current-password'
+            {...register("password", {
+              required: "Password is required",
+              pattern: {
+                value:
+                  /(?=^.{6,10}$)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+}{&quot;:;'?/&gt;.&lt;,])(?!.*\s).*$/,
+                message: "Password does not meet requirement complexity!",
+              },
+            })}
+            error={!!errors.password}
+            helperText={errors?.password?.message}
           />
-          <FormControlLabel
-            control={<Checkbox value='remember' color='primary' />}
-            label='Remember me'
-          />
-          <Button
+
+          <LoadingButton
+            disabled={!isValid}
+            loading={isSubmitting}
             type='submit'
             fullWidth
             variant='contained'
             sx={{mt: 3, mb: 2}}
           >
-            Sign Up
-          </Button>
+            Register
+          </LoadingButton>
           <Grid container>
             <Grid item>
-              <Link to='/login'>{"Have an account? Login here"}</Link>
+              <Link to='/login'>{"Already have an account? Sign In"}</Link>
             </Grid>
           </Grid>
         </Box>
