@@ -50,7 +50,7 @@ namespace API.Controllers
                 Name = user.UserName,
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
-                Basket = anonymousBasket != null ? anonymousBasket.MapBasketToDtos() : userBasket?.MapBasketToDtos()
+                Basket = anonymousBasket != null ? anonymousBasket?.MapBasketToDtos() : userBasket?.MapBasketToDtos()
             };
         }
 
@@ -94,6 +94,7 @@ namespace API.Controllers
 
         private async Task<Basket> RetrieveBasket(string buyerId)
         {
+            
             if (string.IsNullOrEmpty(buyerId)) 
             {
                 Response.Cookies.Delete("buyerId");

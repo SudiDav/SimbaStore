@@ -26,8 +26,12 @@ export default function Login() {
   });
 
   async function submitForm(data: FieldValues) {
+   try {
     await dispatch(signInUser(data));
     history.push("/catalog");
+   } catch (error) {
+    console.log(error)
+   }
   }
 
   const theme = createTheme();

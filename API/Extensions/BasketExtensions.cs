@@ -11,7 +11,7 @@ namespace API.Extensions
             return new BasketDto
             {
                 Id = basket.Id,
-                BuyerId = basket.BuyerId,
+                BuyerId = basket?.BuyerId,
                 Items = basket.Items.Select(item => new BasketItemDto
                 {
                     ProductId = item.ProductId,
