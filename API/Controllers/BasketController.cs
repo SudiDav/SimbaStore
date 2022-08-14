@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
-using API.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,17 +22,17 @@ namespace API.Controllers
         [HttpGet(Name = "GetBasket")]
         public async Task<ActionResult<BasketDto>> GetBasket()
         {
-            var basket = await RetrieveBasket(GetBuyerId());
+            var basket = await RetrieveBasket();
 
             if (basket is null) return NotFound();
-            return basket.MapBasketToDtos();
+            return MapBasketToDto(basket);
         }       
 
         [HttpPost]
         public async Task<ActionResult<BasketDto>> AddItemToBasket(int productId, int quantity)        
         {
             // get the basket
-            var basket = await RetrieveBasket(GetBuyerId());
+            var basket = await RetrieveBasket();
 
             if(basket == null) basket = createBasket();
 
@@ -43,7 +43,7 @@ namespace API.Controllers
 
             var result = await _context.SaveChangesAsync() > 0;
   
-            if(result) return CreatedAtRoute("GetBasket",basket.MapBasketToDtos());
+            if(result) return CreatedAtRoute("GetBasket", MapBasketToDto(basket));
 
             return BadRequest(new ProblemDetails{ Title = "Problem adding Items to the basket" });
         }        
@@ -51,7 +51,7 @@ namespace API.Controllers
         [HttpDelete]
         public async Task<ActionResult> RemoveBasKetItem(int productId, int quantity)
         {
-            var basket = await RetrieveBasket(GetBuyerId());
+            var basket = await RetrieveBasket();
 
             if(basket is null) return NotFound();            
             
@@ -63,39 +63,43 @@ namespace API.Controllers
 
             return BadRequest(new ProblemDetails{ Title = "Problem removing Items from the basket" });
         }       
-
-        private string GetBuyerId()
+        private async Task<Basket> RetrieveBasket()
         {
-            return User.Identity?.Name ?? Request.Cookies["buyerId"];
-        }
-        private async Task<Basket> RetrieveBasket(string buyerId)
-        {
-            if (string.IsNullOrEmpty(buyerId)) 
-            {
-                Response.Cookies.Delete("buyerId");
-                return null;
-            }
             return await _context.Baskets
                 .Include(i => i.Items)
                 .ThenInclude(p => p.Product)
-                .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
+                .FirstOrDefaultAsync(x => x.BuyerId == Request.Cookies["buyerId"]);
         }
         private Basket createBasket()
         {
-            // set the cookies to the buyerId
-            var buyerId = User.Identity?.Name;
-            if (string.IsNullOrEmpty(buyerId))
-            { 
-                buyerId = Guid.NewGuid().ToString();
-                var cookieOptions = new CookieOptions { IsEssential = true, Expires = DateTime.Now.AddDays(30) };
-                Response.Cookies.Append("buyerId", buyerId, cookieOptions);
-            }            
+            var buyerId = Guid.NewGuid().ToString();
+            var cookieOptions = new CookieOptions { IsEssential = true, Expires = DateTime.Now.AddDays(30) };
+            Response.Cookies.Append("buyerId", buyerId, cookieOptions);
             var basket = new Basket()
             {
                 BuyerId = buyerId
             };
             _context.Baskets.Add(basket);
             return basket;
-        }       
+        }
+
+         private BasketDto MapBasketToDto(Basket basket)
+        {
+            return new BasketDto
+            {
+                Id = basket.Id,
+                BuyerId = basket.BuyerId,
+                Items = basket.Items.Select(item => new BasketItemDto
+                {
+                    ProductId = item.ProductId,
+                    Name = item.Product.Name,
+                    Price = item.Product.Price,
+                    PictureUrl = item.Product.PictureUrl,
+                    Type = item.Product.Type,
+                    Brand = item.Product.Brand,
+                    Quantity = item.Quantity
+                }).ToList()
+            };
+        }
     }
 }

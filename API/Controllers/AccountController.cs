@@ -1,13 +1,10 @@
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -17,11 +14,9 @@ namespace API.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly TokenService _tokenService;
-        private readonly StoreContext _context;
 
-        public AccountController(ILogger<AccountController> logger, UserManager<User> userManager, TokenService tokenService, StoreContext context)
+        public AccountController(ILogger<AccountController> logger, UserManager<User> userManager, TokenService tokenService)
         {
-            _context = context;
             _logger = logger;
             _tokenService = tokenService;
             _userManager = userManager;
@@ -34,24 +29,12 @@ namespace API.Controllers
             if(user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return Unauthorized();
 
-            var userBasket = await RetrieveBasket(loginDto.Username);
-            var anonymousBasket = await RetrieveBasket(Request.Cookies["buyerId"]);
-
-            if (anonymousBasket != null)
-            {
-                if(userBasket != null) _context.Baskets.Remove(userBasket);
-                anonymousBasket.BuyerId = user.UserName;
-                Response.Cookies.Delete("buyerId");
-                await _context.SaveChangesAsync();
-            }
-
             return new UserDto
             {
                 Name = user.UserName,
                 Email = user.Email,
-                Token = await _tokenService.GenerateToken(user),
-                Basket = anonymousBasket != null ? anonymousBasket.MapBasketToDtos() : userBasket.MapBasketToDtos()
-        };
+                Token = await _tokenService.GenerateToken(user)
+            };
         }
 
         [HttpPost("register")]      
@@ -87,19 +70,6 @@ namespace API.Controllers
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user)
             };
-        }
-
-        private async Task<Basket> RetrieveBasket(string buyerId)
-        {
-            if (string.IsNullOrEmpty(buyerId)) 
-            {
-                Response.Cookies.Delete("buyerId");
-                return null;
-            }
-            return await _context.Baskets
-                .Include(i => i.Items)
-                .ThenInclude(p => p.Product)
-                .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
         }
     }
 }
