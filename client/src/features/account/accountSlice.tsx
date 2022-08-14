@@ -26,7 +26,7 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
     }
   }
 );
-
+// make request to gte the user from the API
 export const getCurrentUser = createAsyncThunk<User>(
   "account/getCurrentUser",
   async (_, thunkAPI) => {
@@ -41,6 +41,7 @@ export const getCurrentUser = createAsyncThunk<User>(
     }
   },
   {
+    // do make the request if we do not have the user key
     condition: () => {
       if (!localStorage.getItem("user")) return false;
     },
